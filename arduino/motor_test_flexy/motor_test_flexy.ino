@@ -96,6 +96,7 @@ void loop()
   //stepper.setAccelerationInStepsPerSecondPerSecond(200000);
   while(!stepper.motionComplete())
   {
+    stepper.setAccelerationInStepsPerSecondPerSecond(20000);
     stepper.processMovement();
   }
   targetPos = -targetPos;
