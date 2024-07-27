@@ -7,7 +7,7 @@ int accel_in = 0;
 
 void setup() {
   Serial.begin(9600);
-  Serial.println("<Arduino is ready>");
+  Serial.println("<ready>");
 }
 
 long oldPosition  = -999;

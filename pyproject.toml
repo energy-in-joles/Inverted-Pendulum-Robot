@@ -1,0 +1,16 @@
+[project]
+name = "Inverted-Pendulum-Robot"
+version = "1.0.0"
+description = "DQN implementation for inverted pendulum problem, trained and evaluated on physical robot."
+readme = "README.md"
+authors = [
+    {name = "Joel Ng", gh = "energy-in-joles"},
+    {name = "Benjamin Goh", gh = "Extreme-Orange"}
+]
+
+# ...
+dependencies = [
+    "numpy == 1.26.4",
+    "torch == 2.4.0",
+    "pyserial == 3.5"
+]
