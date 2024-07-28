@@ -1,7 +1,7 @@
 from serial import Serial
 import time
 
-def setup_arduino(ser: Serial, max_startup_time: int = 5, auth_str: str = "<ready>") -> None:
+def setup_arduino(ser: Serial, max_startup_time: int, auth_str: str) -> None:
     """
     Initializes communication with an Arduino over a serial connection.
 

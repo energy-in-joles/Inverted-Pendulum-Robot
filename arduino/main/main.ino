@@ -1,6 +1,6 @@
 #include <Encoder.h>
 
-const int BAUD_RATE = 9600;
+const int BAUDRATE = 9600;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
 const int LOOP_BUFFER_SIZE = 1;
 const int POS_PER_REV = 2400;
@@ -54,7 +54,7 @@ void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo) {
 }
 
 void setup() {
-  Serial.begin(BAUD_RATE);
+  Serial.begin(BAUDRATE);
   Serial.println(AUTH_STR);
 }
 
