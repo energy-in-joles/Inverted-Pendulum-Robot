@@ -77,7 +77,8 @@ void setup() {
 
 long oldPosition  = -999;
 int accel_in = 0;
-int isResting = true; // prevent motor from running at start without any input
+bool isResting = true; // prevent motor from running at start without any input
+bool isGoingRight = false;
 
 void loop() {
   long newPosition = myEnc.read();
@@ -100,11 +101,13 @@ void loop() {
     isResting = false;
   }
 
-  if (accel_in < 0) {
+  if (accel_in < 0 || accel_in == 0 && !isGoingRight) {
     stepper.setTargetPositionInSteps(-TARGET_POS);
+    isGoingRight = false;
   }
   else {
     stepper.setTargetPositionInSteps(TARGET_POS);
+    isGoingRight = true;
   }
   // update motor movement using accel_in value
   stepper.setAccelerationInStepsPerSecondPerSecond(abs(accel_in));
