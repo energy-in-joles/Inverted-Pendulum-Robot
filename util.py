@@ -1,5 +1,33 @@
-from serial import Serial
-import time
+from math import pi
+from collections import namedtuple
+
+PosInfo = namedtuple('PosInfo', ('pos', 'loop_i'))
+ENCODER_STEP_PER_REV = 2400
+
+# get angular change from last pos to this pos (in radians)
+def calculate_delta_angle(last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
+    delta_loop = this_pos_info.loop_i - last_pos_info.loop_i
+    delta_pos = this_pos_info.pos - last_pos_info.pos # step delta, not including loop info
+    delta_steps = delta_pos + ENCODER_STEP_PER_REV * delta_loop
+
+    return delta_steps / ENCODER_STEP_PER_REV * 2 * pi
+
+# calculate angular velocity from last pos to this pos (in radians per second)
+def calculate_velocity(delta_t: float, last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
+    delta_angle = calculate_delta_angle(last_pos_info, this_pos_info)
+    return delta_angle / delta_t
+
+# calculate angular acceleration from last vel to this vel (in radians per second square)
+def calculate_acceleration(delta_t: float, last_vel: float, this_vel: float) -> float:
+    delta_vel = this_vel - last_vel
+    return delta_vel / delta_t
+
+# get positional theta value. 0 theta at the top 
+def get_theta(pos: int) -> float:
+    half_rev = ENCODER_STEP_PER_REV / 2
+    pos -= half_rev
+    return pos * pi / half_rev
+
 
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     """
@@ -37,40 +65,3 @@ def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
         loop_i -= 0x100
 
     return pos, loop_i
-
-def setup_arduino(ser: Serial, max_startup_time: int = 5, auth_str: str = "<ready>") -> None:
-    """
-    Initializes communication with an Arduino over a serial connection.
-
-    Args:
-        ser (serial.Serial): The serial object for communication with the Arduino.
-        max_startup_time (int, optional): Maximum time to wait for the Arduino to be ready, in seconds. Default is 5 seconds.
-        auth_str (str, optional): The authentication string sent by the Arduino to indicate it is ready. Default is "<ready>".
-
-    Raises:
-        Exception: If the Arduino does not respond with the authentication string within the allowed startup time.
-    """
-
-    INI_BYTE_STR = b'\x00\x00'
-    isReady = False
-    line = ""
-    start_t = time.time()
-    startup_t = 0
-    while not (isReady or startup_t >= max_startup_time):
-        if ser.in_waiting > 0:
-            line = ser.readline().decode('utf-8').rstrip()
-        if line == auth_str:
-            isReady = True
-        startup_t = time.time() - start_t
-
-    if not isReady:
-        raise Exception("Arduino maximum setup time exceeded!")
-
-    print("-----------------")
-    print("Arduino is ready!")
-    print("-----------------\n")
-
-    # send initial accel of 0 to start the data exchange loop
-    ser.write(INI_BYTE_STR)
-
-# def calculate_velocity():
