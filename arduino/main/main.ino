@@ -1,6 +1,16 @@
 #include <Encoder.h>
+#include <FlexyStepper.h>
 
-const int BAUD_RATE = 9600;
+const int ENCODER_PIN_A = 2;
+const int ENCODER_PIN_B = 3;
+const int MOTOR_STEP_PIN = 4;
+const int MOTOR_DIR_PIN = 7;
+const int MOTOR_EN_PIN = 8;
+const int MOTOR_STEP_LIMIT = 200; // 90 DEG limit (800 steps per rev for quarter step setting: 90 DEG == 200 steps)
+const int TARGET_POS = 10000; // a large value that the motor will never reach (sets direction for motor spin)
+const int MAX_SPEED = 1000;
+
+const int BAUDRATE = 9600;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
 const int LOOP_BUFFER_SIZE = 1;
 const int POS_PER_REV = 2400;
@@ -9,9 +19,8 @@ byte inputBuffer[sizeof(int)];
 byte loopBuffer[LOOP_BUFFER_SIZE];
 byte outputBuffer[sizeof(int) + LOOP_BUFFER_SIZE];
 
-long oldPosition  = -999;
-
-Encoder myEnc(2, 3);
+FlexyStepper stepper;
+Encoder myEnc(ENCODER_PIN_A, ENCODER_PIN_B);
 
 struct EncoderInfo {
   int pos;
@@ -54,9 +63,22 @@ void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo) {
 }
 
 void setup() {
-  Serial.begin(BAUD_RATE);
+  Serial.begin(BAUDRATE);
+  pinMode(MOTOR_EN_PIN, OUTPUT);
+  digitalWrite(MOTOR_EN_PIN, LOW);
+
+  // connect and configure the stepper motor to its IO pins
+  stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIR_PIN);
+  stepper.setCurrentPositionInSteps(0);
+  stepper.setSpeedInStepsPerSecond(MAX_SPEED);
+
   Serial.println(AUTH_STR);
 }
+
+long oldPosition  = -999;
+int accel_in = 0;
+bool isResting = true; // prevent motor from running at start without any input
+bool isGoingRight = false;
 
 void loop() {
   long newPosition = myEnc.read();
@@ -68,10 +90,30 @@ void loop() {
   update_output_buffer(outputBuffer, encoderInfo);
 
   if (Serial.available() > 0) {
-    int accel_in = read_serial();
+    accel_in = read_serial();
     update_output_buffer(outputBuffer, encoderInfo);
     for (int i = 0; i < sizeof(outputBuffer); i++) {
       Serial.write(outputBuffer[i]);
     }
+  }
+
+  if (abs(accel_in) > 0) {
+    isResting = false;
+  }
+
+  if (accel_in < 0 || accel_in == 0 && !isGoingRight) {
+    stepper.setTargetPositionInSteps(-TARGET_POS);
+    isGoingRight = false;
+  }
+  else {
+    stepper.setTargetPositionInSteps(TARGET_POS);
+    isGoingRight = true;
+  }
+  // update motor movement using accel_in value
+  stepper.setAccelerationInStepsPerSecondPerSecond(abs(accel_in));
+
+  long currentPos = stepper.getCurrentPositionInSteps();
+  if (currentPos <= MOTOR_STEP_LIMIT && currentPos >= -MOTOR_STEP_LIMIT && !isResting) {
+    stepper.processMovement();
   }
 }

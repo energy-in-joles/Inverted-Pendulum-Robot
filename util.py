@@ -4,6 +4,7 @@ from collections import namedtuple
 PosInfo = namedtuple('PosInfo', ('pos', 'loop_i'))
 ENCODER_STEP_PER_REV = 2400
 
+
 # get angular change from last pos to this pos (in radians)
 def calculate_delta_angle(last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
     delta_loop = this_pos_info.loop_i - last_pos_info.loop_i
@@ -13,20 +14,24 @@ def calculate_delta_angle(last_pos_info: PosInfo, this_pos_info: PosInfo) -> flo
     return delta_steps / ENCODER_STEP_PER_REV * 2 * pi
 
 # calculate angular velocity from last pos to this pos (in radians per second)
-def calculate_velocity(delta_t: float, last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
+def calculate_velocity(delta_t: float, last_pos_info: PosInfo, this_pos_info: PosInfo, modifier: float) -> float:
     delta_angle = calculate_delta_angle(last_pos_info, this_pos_info)
-    return delta_angle / delta_t
+    return modifier * delta_angle / delta_t
 
 # calculate angular acceleration from last vel to this vel (in radians per second square)
-def calculate_acceleration(delta_t: float, last_vel: float, this_vel: float) -> float:
+def calculate_acceleration(delta_t: float, last_vel: float, this_vel: float, modifier: float) -> float:
     delta_vel = this_vel - last_vel
-    return delta_vel / delta_t
+    return modifier * delta_vel / delta_t
 
 # get positional theta value. 0 theta at the top 
 def get_theta(pos: int) -> float:
     half_rev = ENCODER_STEP_PER_REV / 2
     pos -= half_rev
     return pos * pi / half_rev
+
+# reward function following pendulum environment in openai
+def calculate_reward(theta: float, vel: float, accel: float, vel_weight: float, accel_weight: float) -> float:
+    return -(theta ** 2 + 0.1 * vel_weight ** 2 + accel_weight * accel ** 2)
 
 
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:

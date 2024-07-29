@@ -25,7 +25,7 @@ void setup() {
  // myStepper.setMaxSpeed(1000);
   myStepper.setAcceleration(20000);
   myStepper.setMaxSpeed(4000);
-  myStepper.setSpeed(1000);
+  //myStepper.setSpeed(1000);
   myStepper.moveTo(150);
   
 }

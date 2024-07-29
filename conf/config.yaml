@@ -1,0 +1,24 @@
+defaults:
+  - _self_
+  - mode: train
+  - override hydra/hydra_logging: disabled
+  - override hydra/hydra_logging: disabled
+
+model_filename: "model_latest.pkl"
+model_dir_name: "model"
+
+serial:
+  baudrate: 9600
+  port: 'COM3'
+  timeout: 1
+  max_startup_t: 5
+  auth_str: "<ready>"
+  sleep_t: 0.01
+
+calc:
+  vel_modifier: 0.5
+  accel_modifier: 0.1
+
+reward:
+  vel_weight: 0.1
+  accel_weight: 0.001
