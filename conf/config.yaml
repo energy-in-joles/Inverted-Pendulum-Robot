@@ -19,6 +19,10 @@ action_space:
   interval: 100
   half_range: 20000
 
+# element position: x=cos(theta), y=sin(theta), angular vel
+observation_space:
+  lower_bound: [-1, -1, -15]
+  upper_bound: [1, 1, 15]
 
 calc:
   vel_modifier: 0.5

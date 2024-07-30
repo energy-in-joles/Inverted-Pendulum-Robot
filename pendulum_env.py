@@ -9,11 +9,11 @@ class PendulumEnv(Env):
     def __init__(self, cfg: DictConfig, ser: Serial):
         super(PendulumEnv, self).__init__()
         self.ser = ser
-        self.serial_cfg = cfg.serial
         self.action_half_range = cfg.action_space.half_range
         self.action_interval = cfg.action_space.interval
-        self.action_space = Discrete(self.action_half_range * 2 // self.action_interval)
-        self._setup()
+        self.action_space = Discrete((self.action_half_range * 2 // self.action_interval) + 1)
+        self.observation_space = self.create_observation_space(cfg.observation_space)
+        self._setup(cfg.serial)
 
     def step(self):
         pass
@@ -21,7 +21,7 @@ class PendulumEnv(Env):
     def reset(self):
         pass
 
-    def _setup(self) -> None:
+    def _setup(self, serial_cfg: DictConfig) -> None:
         """
         Initializes communication with an Arduino over a serial connection.
 
@@ -40,10 +40,10 @@ class PendulumEnv(Env):
         start_t = time.time()
         startup_t = 0
 
-        while not (isReady or startup_t >= self.serial_cfg.max_startup_t):
+        while not (isReady or startup_t >= serial_cfg.max_startup_t):
             if self.ser.in_waiting > 0:
                 line = self.ser.readline().decode('utf-8').rstrip()
-            if line == self.serial_cfg.auth_str:
+            if line == serial_cfg.auth_str:
                 isReady = True
             startup_t = time.time() - start_t
 
@@ -58,6 +58,12 @@ class PendulumEnv(Env):
         self.ser.write(INI_BYTE_STR)
     
     # decode action in discrete space to actual acceleration value
-    def action_to_acceleration(self, action: int):
+    def action_to_acceleration(self, action: int) -> int:
         return action * self.action_interval - self.action_half_range
+    
+    # generate Box object observation space
+    def create_observation_space(self, obs_space_cfg: DictConfig) -> Box:
+        lower_bound = np.array(obs_space_cfg.lower_bound, dtype=np.float32)
+        upper_bound = np.array(obs_space_cfg.upper_bound, dtype=np.float32)
+        return Box(low=lower_bound, high=upper_bound, dtype=np.float32)
 
