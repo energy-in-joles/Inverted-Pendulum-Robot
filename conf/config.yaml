@@ -15,6 +15,11 @@ serial:
   auth_str: "<ready>"
   sleep_t: 0.01
 
+action_space:
+  interval: 100
+  half_range: 20000
+
+
 calc:
   vel_modifier: 0.5
   accel_modifier: 0.1

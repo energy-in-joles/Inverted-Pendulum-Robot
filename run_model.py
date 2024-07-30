@@ -12,7 +12,7 @@ from util import (
     get_theta
 )
 
-import robot_control
+from pendulum_env import PendulumEnv
 
 def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
     accel = 0
@@ -21,7 +21,7 @@ def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
     FIRST_TWO_FRAMES = 2
     iterations += FIRST_TWO_FRAMES # first 2 iterations no training: not enough data
 
-    robot_control.setup(ser, cfg.serial.max_startup_t, cfg.serial.auth_str)
+    pendulumEnv = PendulumEnv(cfg, ser)
 
     while i < iterations:
         data_in = ser.read(3)
