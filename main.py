@@ -1,5 +1,4 @@
 import time
-import threading
 from serial import Serial
 import torch
 import os

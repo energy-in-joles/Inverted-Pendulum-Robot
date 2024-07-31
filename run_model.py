@@ -1,5 +1,6 @@
 from serial import Serial
 import time
+import threading
 from omegaconf import DictConfig
 
 from util import PosInfo
@@ -13,6 +14,8 @@ from util import (
 )
 
 from pendulum_env import PendulumEnv
+
+task_lock = threading.Lock()
 
 def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
     accel = 0
