@@ -12,12 +12,10 @@ const int MAX_SPEED = 1000;
 
 const int BAUDRATE = 9600;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
-const int LOOP_BUFFER_SIZE = 1;
 const int POS_PER_REV = 2400;
 
 byte inputBuffer[sizeof(int)];
-byte loopBuffer[LOOP_BUFFER_SIZE];
-byte outputBuffer[sizeof(int) + LOOP_BUFFER_SIZE];
+byte outputBuffer[4];
 
 FlexyStepper stepper;
 Encoder myEnc(ENCODER_PIN_A, ENCODER_PIN_B);
@@ -56,10 +54,12 @@ int read_serial() {
 }
 
 // prepare output buffer to send position and loop index data to python script
-void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo) {
+// buffer: 12 bits for encoder position (little endian), 11 bits for loop_i (big endian), 9 bits for stepper pos
+void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo, int currentStepperPos) {
   outputBuffer[0] = (encoderInfo.pos >> 0) & 0xFF;
-  outputBuffer[1] = (encoderInfo.pos >> 8) & 0xFF;
-  outputBuffer[2] = (encoderInfo.loop_i >> 0) &0xFF;
+  outputBuffer[1] = (encoderInfo.pos >> 4) & 0xF0 | (encoderInfo.loop_i >> 7) & 0x0F;
+  outputBuffer[2] = (encoderInfo.loop_i << 1) & 0xFE | (currentStepperPos >> 9) & 0x01 ; // get MSB
+  outputBuffer[3] = (currentStepperPos >> 0) &0xFF;
 }
 
 void setup() {
@@ -79,6 +79,7 @@ long oldPosition  = -999;
 int accel_in = 0;
 bool isResting = true; // prevent motor from running at start without any input
 bool isGoingRight = false;
+int currentStepperPos = 0;
 
 void loop() {
   long newPosition = myEnc.read();
@@ -87,11 +88,11 @@ void loop() {
   }
   EncoderInfo encoderInfo = update_encoder_info(newPosition);
 
-  update_output_buffer(outputBuffer, encoderInfo);
+  update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
 
   if (Serial.available() > 0) {
     accel_in = read_serial();
-    update_output_buffer(outputBuffer, encoderInfo);
+    update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
     for (int i = 0; i < sizeof(outputBuffer); i++) {
       Serial.write(outputBuffer[i]);
     }
@@ -112,8 +113,8 @@ void loop() {
   // update motor movement using accel_in value
   stepper.setAccelerationInStepsPerSecondPerSecond(abs(accel_in));
 
-  long currentPos = stepper.getCurrentPositionInSteps();
-  if (currentPos <= MOTOR_STEP_LIMIT && currentPos >= -MOTOR_STEP_LIMIT && !isResting) {
+  currentStepperPos = stepper.getCurrentPositionInSteps();
+  if (currentStepperPos <= MOTOR_STEP_LIMIT && currentStepperPos >= -MOTOR_STEP_LIMIT && !isResting) {
     stepper.processMovement();
   }
 }

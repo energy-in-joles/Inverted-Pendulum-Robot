@@ -27,10 +27,10 @@ def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
     pendulumEnv = PendulumEnv(cfg, ser)
 
     while i < iterations:
-        data_in = ser.read(3)
+        data_in = ser.read(4)
         this_t = time.time()
 
-        pos, loop_i = interpret_encoder_info(data_in)
+        pos, loop_i, motor_pos = interpret_encoder_info(data_in)
         this_pos_info = PosInfo(pos, loop_i)
         this_theta = get_theta(this_pos_info.pos)
         # at earlier iterations, data insufficient to calculate vel/accel so we skip training
@@ -39,11 +39,15 @@ def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
             this_vel = calculate_velocity(delta_t, last_pos_info, this_pos_info, cfg.calc.vel_modifier)
             if i > 1:
                 this_accel = calculate_acceleration(delta_t, last_vel, this_vel, cfg.calc.accel_modifier)
-                print(calculate_reward(this_theta, this_vel, this_accel, cfg.reward.vel_weight, cfg.reward.accel_weight), this_theta, this_vel, this_accel)
+                print(calculate_reward(this_theta, this_vel, this_accel, cfg.reward.vel_weight, cfg.reward.accel_weight), this_theta, this_vel, this_accel, motor_pos, this_pos_info.pos, this_pos_info.loop_i)
                 reward_sum += calculate_reward(this_theta, this_vel, this_accel, cfg.reward.vel_weight, cfg.reward.accel_weight)
                 # t1 = threading.Thread(target=test).start()
             last_vel = this_vel
         
+        if i > 10:
+            accel = -150
+        
+
         time.sleep(cfg.serial.sleep_t)
         ser.write(accel.to_bytes(2, byteorder='little', signed=True))
 

@@ -59,15 +59,15 @@ def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     ValueError: If the length of byte_data is not exactly 3 bytes.
     """
     
-    if len(byte_data) != 3:
+    if len(byte_data) != 4:
         raise ValueError("Data length should be exactly 3 bytes for short.")
-    pos = byte_data[0] | (byte_data[1] << 8)
-    loop_i = byte_data[2]
+    pos = byte_data[0] | (byte_data[1] >> 4) << 8
+    loop_i = (byte_data[1] & 0x0F) << 7 | (byte_data[2] >> 1)
+    motor_pos = byte_data[3] | ((byte_data[2] & 0x01) << 8)
+    if loop_i & 0x400: # convert 11-bit number loop
+        loop_i -= 0x800
+    
+    if motor_pos & 0x100: # convert 9-bit motor position
+        motor_pos -= 0x200
 
-    if pos & 0x8000:  # Check if the sign bit is set
-        pos -= 0x10000  # Convert to negative value
-
-    if loop_i & 0x80:
-        loop_i -= 0x100
-
-    return pos, loop_i
+    return pos, loop_i, motor_pos
