@@ -29,9 +29,10 @@ def get_theta(pos: int) -> float:
     pos -= half_rev
     return pos * pi / half_rev
 
+# DEBUGGING ONLY, SHOULD BE MOVED TO PendulumEnv
 # reward function following pendulum environment in openai
 def calculate_reward(theta: float, vel: float, accel: float, vel_weight: float, accel_weight: float) -> float:
-    return -(theta ** 2 + 0.1 * vel_weight ** 2 + accel_weight * accel ** 2)
+    return -(theta ** 2 + 0.1 * vel_weight * (vel ** 2) + accel_weight * (accel ** 2))
 
 
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
