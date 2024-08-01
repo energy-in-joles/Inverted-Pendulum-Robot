@@ -33,6 +33,7 @@ def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
         pos, loop_i, motor_pos = interpret_encoder_info(data_in)
         this_pos_info = PosInfo(pos, loop_i)
         this_theta = get_theta(this_pos_info.pos)
+
         # at earlier iterations, data insufficient to calculate vel/accel so we skip training
         if i > 0:
             delta_t = this_t - last_t
@@ -45,7 +46,7 @@ def train_model(cfg: DictConfig, ser: Serial, iterations=100000):
             last_vel = this_vel
         
         if i > 10:
-            accel = -150
+            pendulumEnv.reset_pos()
         
 
         time.sleep(cfg.serial.sleep_t)

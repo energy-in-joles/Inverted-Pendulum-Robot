@@ -12,6 +12,7 @@ const int MAX_SPEED = 1000;
 
 const int BAUDRATE = 9600;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
+const int RESET_CMD = 32767;
 const int POS_PER_REV = 2400;
 
 byte inputBuffer[sizeof(int)];
@@ -91,11 +92,11 @@ void loop() {
   update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
 
   if (Serial.available() > 0) {
-    accel_in = read_serial();
     update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
     for (int i = 0; i < sizeof(outputBuffer); i++) {
       Serial.write(outputBuffer[i]);
     }
+    accel_in = read_serial();
   }
 
   if (abs(accel_in) > 0) {

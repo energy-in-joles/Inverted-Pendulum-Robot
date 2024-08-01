@@ -7,9 +7,12 @@ from gym.spaces import Discrete, Box
 from omegaconf import DictConfig
 import time
 
+# states: 0 = ready/training, 1 = done, 2 = resetting
+
 class PendulumEnv(Env):
     def __init__(self, cfg: DictConfig, ser: Serial):
         super(PendulumEnv, self).__init__()
+        self.is_done = False
         self.ser = ser
         self.action_half_range = cfg.action_space.half_range
         self.action_interval = cfg.action_space.interval
@@ -58,6 +61,11 @@ class PendulumEnv(Env):
 
         # send initial accel of 0 to start the data exchange loop
         self.ser.write(INI_BYTE_STR)
+
+    def _reset_pos(self) -> None:
+        RESET_CMD = 32767 # out of bounds from highest acceleration value
+        self.ser.write(RESET_CMD.to_bytes(2, byteorder='little', signed=True))
+        
     
     # decode action in discrete space to actual acceleration value
     def _action_to_acceleration(self, action: int) -> int:
