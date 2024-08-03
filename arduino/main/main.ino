@@ -63,6 +63,11 @@ void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo, int curre
   outputBuffer[3] = (currentStepperPos >> 0) &0xFF;
 }
 
+void reset_pos() {
+  stepper.setAccelerationInStepsPerSecondPerSecond(20000);
+  stepper.moveToPositionInSteps(0);
+}
+
 void setup() {
   Serial.begin(BAUDRATE);
   pinMode(MOTOR_EN_PIN, OUTPUT);
@@ -90,15 +95,24 @@ void loop() {
   EncoderInfo encoderInfo = update_encoder_info(newPosition);
 
   update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
-
   if (Serial.available() > 0) {
+    accel_in = read_serial();
+    // reset stepper back to start position
+    if (accel_in == RESET_CMD) {
+      reset_pos();
+      isResting = true;
+      accel_in = 0;
+      Serial.println(AUTH_STR);
+      return;
+    } 
+    // update python script with positional information
     update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
     for (int i = 0; i < sizeof(outputBuffer); i++) {
       Serial.write(outputBuffer[i]);
     }
-    accel_in = read_serial();
   }
 
+  // move motor and update motor movement information
   if (abs(accel_in) > 0) {
     isResting = false;
   }

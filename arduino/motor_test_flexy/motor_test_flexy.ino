@@ -90,18 +90,6 @@ void setup()
 
 void loop() 
 {
-  //stepper.setSpeedInStepsPerSecond(7000);
-  stepper.setSpeedInStepsPerSecond(1000);
-  stepper.setAccelerationInStepsPerSecondPerSecond(20000);
-  //stepper.setAccelerationInStepsPerSecondPerSecond(200000);
-  while(!stepper.motionComplete())
-  {
-    stepper.setAccelerationInStepsPerSecondPerSecond(20000);
-    stepper.processMovement();
-  }
-  targetPos = -targetPos;
-  stepper.setTargetPositionInSteps(targetPos);
-  long currentPosition = stepper.getCurrentPositionInSteps();
-  Serial.println(currentPosition);
-  delay(10);
+  stepper.moveToPositionInSteps(100);
+  return;
 }

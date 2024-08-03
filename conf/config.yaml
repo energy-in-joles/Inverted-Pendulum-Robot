@@ -7,7 +7,13 @@ defaults:
 model_filename: "model_latest.pkl"
 model_dir_name: "model"
 
+episode:
+  episode_length: 500
+  episodes: 500
+
 serial:
+  in_buffer_size: 4
+  out_buffer_size: 2
   baudrate: 9600
   port: 'COM3'
   timeout: 1
@@ -21,12 +27,15 @@ action_space:
 
 # element position: x=cos(theta), y=sin(theta), angular vel
 observation_space:
-  lower_bound: [-1, -1, -15]
-  upper_bound: [1, 1, 15]
+  lower_bound: [-1, -1, -15, -10, -1]
+  upper_bound: [1, 1, 15, 10, 1]
 
+# motor half_range can record up to 300, but is bounded to 200
 calc:
   vel_modifier: 0.5
   accel_modifier: 0.1
+  motor_half_range: 300
+  motor_half_limit: 200
 
 reward:
   vel_weight: 0.1
