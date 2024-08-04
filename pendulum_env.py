@@ -58,7 +58,7 @@ class PendulumEnv(Env):
             truncated = False
 
         reward = self._calculate_reward(
-            observation[0], observation[1], observation[2], observation[3], action, True
+            observation[0], observation[1], observation[2], observation[3], action, terminated
             )
         info = {}
         self.last_t = this_t
@@ -182,7 +182,7 @@ class PendulumEnv(Env):
         norm_motor_pos: float, 
         norm_motor_vel: float, 
         action: float,
-        truncated: bool
+        terminated: bool
     ) -> float:
         vel_weight = self.cfg.reward.vel_weight
         motor_pos_weight = self.cfg.reward.motor_pos_weight
@@ -195,7 +195,7 @@ class PendulumEnv(Env):
                 + motor_vel_weight * (norm_motor_vel ** 2)
                 + control_weight * (action ** 2))
         
-        if truncated:
+        if terminated:
             episodes_left = self.cfg.episode.episode_length - 1 - self.episode_frame
             cost += episodes_left * terminal_penalty
         
