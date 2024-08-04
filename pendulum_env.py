@@ -1,7 +1,6 @@
 import numpy as np
 from numpy.typing import NDArray
 from typing import Any
-from math import cos, sin
 from serial import Serial
 from gymnasium import Env
 from gymnasium.spaces import Box
@@ -15,8 +14,7 @@ from util import (
     get_theta,
     calculate_velocity,
     normalise_motor_pos,
-    calculate_norm_motor_velocity,
-    calculate_reward
+    calculate_norm_motor_velocity
 )
 
 # states: 0 = ready/training, 1 = done, 2 = resetting
@@ -48,20 +46,7 @@ class PendulumEnv(Env):
         pos, loop_i, motor_pos = interpret_encoder_info(data_in)
         this_pos_info = PosInfo(pos, loop_i, motor_pos)
         observation = self._create_observation_array(this_t - self.last_t, this_pos_info)
-        reward = calculate_reward(
-            observation[0], 
-            observation[1], 
-            motor_pos,
-            observation[2], 
-            observation[3], 
-            action, 
-            self.cfg.reward.vel_weight, 
-            self.cfg.reward.motor_pos_weight,
-            self.cfg.reward.motor_vel_weight,
-            self.cfg.reward.control_weight,
-            self.cfg.reward.terminal_penalty
-            )
-        
+ 
         if abs(motor_pos) >= self.cfg.calc.motor_half_limit:
             terminated = True
         else:
@@ -72,6 +57,9 @@ class PendulumEnv(Env):
         else:
             truncated = False
 
+        reward = self._calculate_reward(
+            observation[0], observation[1], observation[2], observation[3], action, True
+            )
         info = {}
         self.last_t = this_t
         self.last_pos_info = this_pos_info
@@ -185,3 +173,30 @@ class PendulumEnv(Env):
         this_norm_motor_vel = calculate_norm_motor_velocity(delta_t, last_motor_pos, this_motor_pos, self.cfg.calc.motor_vel_modifier)
 
         return np.array([this_theta, this_vel, this_motor_pos, this_norm_motor_vel], dtype=np.float32)
+    
+    # reward function based on Quanser Qube design
+    def _calculate_reward(
+        self,
+        theta: float, 
+        vel: float, 
+        norm_motor_pos: float, 
+        norm_motor_vel: float, 
+        action: float,
+        truncated: bool
+    ) -> float:
+        vel_weight = self.cfg.reward.vel_weight
+        motor_pos_weight = self.cfg.reward.motor_pos_weight
+        motor_vel_weight = self.cfg.reward.motor_vel_weight
+        control_weight = self.cfg.reward.motor_vel_weight
+        terminal_penalty = self.cfg.reward.terminal_penalty
+        cost = (theta ** 2 
+                + vel_weight * (vel ** 2) 
+                + motor_pos_weight * (norm_motor_pos ** 2) 
+                + motor_vel_weight * (norm_motor_vel ** 2)
+                + control_weight * (action ** 2))
+        
+        if truncated:
+            episodes_left = self.cfg.episode.episode_length - 1 - self.episode_frame
+            cost += episodes_left * terminal_penalty
+        
+        return -cost

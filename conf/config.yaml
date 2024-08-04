@@ -47,5 +47,5 @@ reward:
   motor_pos_weight: 0.1
   motor_vel_weight: 0.02
   control_weight: 0.03
-  terminal_penalty: 9000
+  terminal_penalty: 15
   # accel_weight: 0.001

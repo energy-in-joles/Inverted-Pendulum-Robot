@@ -28,33 +28,6 @@ def calculate_norm_motor_velocity(delta_t: float, last_norm_motor_vel: float, th
 def normalise_motor_pos(motor_pos: int, motor_half_range: int, motor_norm_half_range: int) -> float:
     return motor_pos / motor_half_range * motor_norm_half_range
 
-# DEBUGGING ONLY, SHOULD BE MOVED TO PendulumEnv
-# reward function following pendulum environment in openai
-def calculate_reward(
-    theta: float, 
-    vel: float, 
-    motor_pos: int,
-    norm_motor_pos: float, 
-    norm_motor_vel: float, 
-    action: float, 
-    vel_weight: float, 
-    motor_pos_weight: float, 
-    motor_vel_weight: float, 
-    control_weight: float,
-    terminal_penalty: float
-) -> float:
-    cost = (theta ** 2 
-             + vel_weight * (vel ** 2) 
-             + motor_pos_weight * (norm_motor_pos ** 2) 
-             + motor_vel_weight * (norm_motor_vel ** 2)
-             + control_weight * (action ** 2))
-    
-    if abs(motor_pos) >= 200:
-        cost += terminal_penalty
-
-    return -cost
-
-
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     """
     Interprets a 3-byte sequence to extract encoder information.
