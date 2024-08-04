@@ -21,21 +21,38 @@ def get_theta(pos: int) -> float:
     pos -= half_rev
     return pos * pi / half_rev
 
-# normalise motor position to be within -1 and 1
-def normalise_motor_pos(motor_pos: int, motor_half_range: int) -> float:
-    return motor_pos / motor_half_range
+def calculate_norm_motor_velocity(delta_t: float, last_norm_motor_vel: float, this_norm_motor_vel: float, modifier: float):
+    return modifier * (this_norm_motor_vel - last_norm_motor_vel) / delta_t
+
+# normalise motor position to be within -2 and 2
+def normalise_motor_pos(motor_pos: int, motor_half_range: int, motor_norm_half_range: int) -> float:
+    return motor_pos / motor_half_range * motor_norm_half_range
 
 # DEBUGGING ONLY, SHOULD BE MOVED TO PendulumEnv
 # reward function following pendulum environment in openai
 def calculate_reward(
     theta: float, 
     vel: float, 
-    accel: float, 
-    norm_motor_pos: float,
+    motor_pos: int,
+    norm_motor_pos: float, 
+    norm_motor_vel: float, 
+    action: float, 
     vel_weight: float, 
-    accel_weight: float
+    motor_pos_weight: float, 
+    motor_vel_weight: float, 
+    control_weight: float,
+    terminal_penalty: float
 ) -> float:
-    return -(theta ** 2 + 0.1 * vel_weight * (vel ** 2) + accel_weight * (accel ** 2))
+    cost = (theta ** 2 
+             + vel_weight * (vel ** 2) 
+             + motor_pos_weight * (norm_motor_pos ** 2) 
+             + motor_vel_weight * (norm_motor_vel ** 2)
+             + control_weight * (action ** 2))
+    
+    if abs(motor_pos) >= 200:
+        cost += terminal_penalty
+
+    return -cost
 
 
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:

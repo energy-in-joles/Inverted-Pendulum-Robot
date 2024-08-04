@@ -22,21 +22,30 @@ serial:
   sleep_t: 0.01
 
 action_space:
-  interval: 100
-  half_range: 20000
+  half_range: 2
+  actual_half_range: 20000
 
-# element position: x=cos(theta), y=sin(theta), angular vel
+#  interval: 100
+
+# element position: theta, angular_vel, motor_pos, motor_vel
 observation_space:
-  lower_bound: [-1, -1, -15, -10, -1]
-  upper_bound: [1, 1, 15, 10, 1]
+  lower_bound: [-3.2, -15, -3, -4]
+  upper_bound: [3.2, 15, 3, 4]
 
 # motor half_range can record up to 300, but is bounded to 200
 calc:
-  vel_modifier: 0.5
-  accel_modifier: 0.1
+  vel_modifier: 0.1
+  motor_vel_modifier: 0.25
   motor_half_range: 300
   motor_half_limit: 200
+  motor_norm_half_range: 3
+  # accel_modifier: 0.1
+
 
 reward:
   vel_weight: 0.1
-  accel_weight: 0.001
+  motor_pos_weight: 0.1
+  motor_vel_weight: 0.02
+  control_weight: 0.03
+  terminal_penalty: 9000
+  # accel_weight: 0.001
