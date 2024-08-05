@@ -17,8 +17,6 @@ from util import (
     calculate_norm_motor_velocity
 )
 
-# states: 0 = ready/training, 1 = done, 2 = resetting
-
 class PendulumEnv(Env):
     def __init__(self, cfg: DictConfig, ser: Serial):
         super(PendulumEnv, self).__init__()
@@ -37,7 +35,7 @@ class PendulumEnv(Env):
     
     # move robot based on given action and feedback environment data to decision maker
     def step(self, action: NDArray) -> tuple[NDArray, float, bool, bool, dict]:
-        accel = self._action_to_acceleration(action)
+        accel = self._action_to_acceleration(action[0])
         self.ser.write(accel.to_bytes(self.cfg.serial.out_buffer_size, byteorder='little', signed=True))
         
         data_in = self.ser.read(self.cfg.serial.in_buffer_size)
@@ -69,6 +67,7 @@ class PendulumEnv(Env):
     
     def close(self):
         self.reset()
+
     # reset environment back to starting position
     def reset(self, seed: int = None) -> tuple[NDArray, dict[str, Any]]:
         super().reset(seed=seed)
@@ -113,11 +112,12 @@ class PendulumEnv(Env):
 
         self._update_first_pos()
 
+    # send reset command to robot to send stepper to position 0
     def _reset_pos(self) -> None:
         RESET_CMD = 32767 # out of bounds from highest acceleration value
         self.ser.write(RESET_CMD.to_bytes(self.cfg.serial.out_buffer_size, byteorder='little', signed=True))
 
-    # update last pos and last vel info at the start of an episode (we can't get our first observation without these)
+    # update last pos and time info at the start of an episode (we can't get our first observation without these)
     def _update_first_pos(self) -> None:
         ZERO_ACCEL_STR = b'\x00' * self.cfg.serial.out_buffer_size
         
@@ -139,21 +139,17 @@ class PendulumEnv(Env):
         # self.last_pos_info = this_pos_info
         # self.last_vel = this_vel
 
-    # decode action in discrete space to actual acceleration value
+    # decode action in normalised continuous action space to actual acceleration value
     def _action_to_acceleration(self, action: float) -> int:
         mult = self.cfg.action_space.actual_half_range / self.cfg.action_space.half_range
-        return round(action[0] * mult)
+        return round(action * mult)
     
+    # create continuous Box action space
     def _create_action_space(self, action_space_cfg: DictConfig):
         half_range = action_space_cfg.half_range
         return Box(low=-half_range, high=half_range, shape=(1,), dtype=np.float32)
-    # def _action_to_acceleration(self, action: int) -> int:
-    #     return action * self.cfg.action_space.interval - self.cfg.action_space.half_range
-    
-    # def _create_action_space(self, action_space_cfg: DictConfig):
-    #     return Discrete(action_space_cfg.half_range * 2 // action_space_cfg.interval)
 
-    # generate Box object observation space
+    # generate continuous Box observation space
     def _create_observation_space(self, obs_space_cfg: DictConfig) -> Box:
         lower_bound = np.array(obs_space_cfg.lower_bound, dtype=np.float32)
         upper_bound = np.array(obs_space_cfg.upper_bound, dtype=np.float32)
@@ -175,6 +171,7 @@ class PendulumEnv(Env):
         return np.array([this_theta, this_vel, this_motor_pos, this_norm_motor_vel], dtype=np.float32)
     
     # reward function based on Quanser Qube design
+    # includes theta, angular velocity, motor_pos, motor_velocity, action
     def _calculate_reward(
         self,
         theta: float, 

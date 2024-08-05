@@ -24,7 +24,6 @@ serial:
 action_space:
   half_range: 2
   actual_half_range: 20000
-
 #  interval: 100
 
 # element position: theta, angular_vel, motor_pos, motor_vel

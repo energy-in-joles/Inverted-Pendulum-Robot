@@ -1,18 +1,22 @@
 [project]
 name = "Inverted-Pendulum-Robot"
 version = "1.0.0"
-description = "DQN implementation for inverted pendulum problem, trained and evaluated on physical robot."
+description = "PPO implementation for inverted pendulum problem, trained and evaluated on physical robot."
 readme = "README.md"
 authors = [
-    {name = "Joel Ng", gh = "energy-in-joles"},
-    {name = "Benjamin Goh", gh = "Extreme-Orange"}
+    { name = "Joel Ng", email = "nzmjoel@gmail.com" },
+    { name = "Benjamin Goh", email = "bengoh16@gmail.com" }
 ]
 
-# ...
 dependencies = [
     "numpy == 1.26.4",
     "torch == 2.4.0",
     "pyserial == 3.5",
-    "hydra-core == 1.3.2"
-    "gymnasium == 0.29.1"
+    "hydra-core == 1.3.2",
+    "gymnasium == 0.29.1",
+    "stable_baselines3 == 2.3.2"
 ]
+requires-python = ">=3.9"
+
+[tool.setuptools]
+py-modules = []

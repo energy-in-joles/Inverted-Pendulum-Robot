@@ -1,6 +1,5 @@
 from math import pi
 from collections import namedtuple
-from numpy.typing import NDArray
 
 PosInfo = namedtuple('PosInfo', ('pos', 'loop_i', 'motor_pos'))
 ENCODER_STEP_PER_REV = 2400
