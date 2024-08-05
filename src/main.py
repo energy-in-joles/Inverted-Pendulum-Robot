@@ -14,7 +14,8 @@ def main(cfg: DictConfig):
     MODEL_FILENAME = "model_latest.pkl"
     MODEL_DIR_NAME = "model"
     SRC_PATH = os.path.dirname(__file__)
-    MODEL_DIR_PATH = os.path.join(os.path.split(SRC_PATH), MODEL_DIR_NAME)
+    MODEL_DIR_PATH = os.path.join(os.path.split(SRC_PATH)[0], MODEL_DIR_NAME)
+    print(MODEL_DIR_PATH)
 
     os.makedirs(MODEL_DIR_PATH, exist_ok=True)
 
