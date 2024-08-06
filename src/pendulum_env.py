@@ -74,6 +74,7 @@ class PendulumEnv(Env):
         self._reset_pos()
         self.episode_frame = 0
         self._setup()
+        # time.sleep(1)
         time.sleep(self.cfg.serial.sleep_t)
         observation, _, _, _, info = self.step(np.array([0]))
         return observation, info
@@ -186,11 +187,12 @@ class PendulumEnv(Env):
         motor_vel_weight = self.cfg.reward.motor_vel_weight
         control_weight = self.cfg.reward.motor_vel_weight
         terminal_penalty = self.cfg.reward.terminal_penalty
-        cost = (theta ** 2 
-                + vel_weight * (vel ** 2) 
-                + motor_pos_weight * (norm_motor_pos ** 2) 
-                + motor_vel_weight * (norm_motor_vel ** 2)
-                + control_weight * (action ** 2))
+        cost = theta ** 2
+        # cost = (theta ** 2 
+        #         + vel_weight * (vel ** 2) 
+        #         + motor_pos_weight * (norm_motor_pos ** 2) 
+        #         + motor_vel_weight * (norm_motor_vel ** 2)
+        #         + control_weight * (action ** 2))
         
         if terminated:
             episodes_left = self.cfg.episode.episode_length - 1 - self.episode_frame

@@ -27,8 +27,8 @@ def train_model(cfg: DictConfig, ser: Serial):
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     env = PendulumEnv(cfg, ser)
-    model = PPO("MlpPolicy", env, verbose=1, device=device)
-    model.learn(total_timesteps=10000000)
+    model = PPO("MlpPolicy", env, verbose=1, device=device, use_sde=True)
+    model.learn(total_timesteps=1e6)
 
     # vec_env = model.get_env()
     # obs = vec_env.reset()
