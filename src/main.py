@@ -16,7 +16,7 @@ def main(cfg: DictConfig):
 
     os.makedirs(MODEL_DIR_PATH, exist_ok=True)
 
-    model_file_path = os.path.join(SRC_PATH, MODEL_FILENAME)
+    model_file_path = os.path.join(MODEL_DIR_PATH, MODEL_FILENAME)
 
     ser = Serial(port=cfg.serial.port, baudrate=cfg.serial.baudrate, timeout=cfg.serial.timeout)
     ser.reset_input_buffer()

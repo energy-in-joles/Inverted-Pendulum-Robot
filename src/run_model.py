@@ -29,8 +29,14 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
 def train_model(cfg: DictConfig, ser: Serial, model_file_path: str):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     env = PendulumEnv(cfg, ser)
-    model = PPO("MlpPolicy", env, verbose=1, device=device)
-    model.learn(total_timesteps=1000000)
+    model = PPO(
+        "MlpPolicy", 
+        env, 
+        verbose=1, 
+        n_steps=cfg.mode.n_steps
+        device=device
+        )
+    model.learn(total_timesteps=1e7)
     model.save(model_file_path)
 
     env.close()
