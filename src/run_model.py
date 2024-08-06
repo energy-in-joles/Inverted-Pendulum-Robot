@@ -23,17 +23,14 @@ task_lock = threading.Lock()
 #         if done:
 #             pendulumEnv.reset()
 
-def train_model(cfg: DictConfig, ser: Serial):
+def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
+    return
 
+def train_model(cfg: DictConfig, ser: Serial, model_file_path: str):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     env = PendulumEnv(cfg, ser)
-    model = PPO("MlpPolicy", env, verbose=1, device=device, use_sde=True)
-    model.learn(total_timesteps=1e6)
-
-    # vec_env = model.get_env()
-    # obs = vec_env.reset()
-    # for i in range(1000):
-    #     action, _states = model.predict(obs, deterministic=True)
-    #     obs, reward, done, info = vec_env.step(action)
+    model = PPO("MlpPolicy", env, verbose=1, device=device)
+    model.learn(total_timesteps=1000000)
+    model.save(model_file_path)
 
     env.close()
