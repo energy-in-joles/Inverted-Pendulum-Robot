@@ -24,7 +24,7 @@ task_lock = threading.Lock()
 
 
 def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
-    if cfg.mode.model == "PPO":
+    if cfg.mode.model.name == "PPO":
         model = PPO.load(model_file_path)
     else:
         model = SAC.load(model_file_path)
