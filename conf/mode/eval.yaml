@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - model: SAC
+
+name: "eval"
+episode_length: -1

@@ -1,0 +1,6 @@
+name: "PPO"
+
+policy: "MlpPolicy"
+n_steps: 4000
+use_sde: True
+verbose: 1

@@ -7,10 +7,6 @@ defaults:
 model_filename: "model_latest.pkl"
 model_dir_name: "model"
 
-episode:
-  episode_length: 500
-  episodes: 500
-
 serial:
   in_buffer_size: 4
   out_buffer_size: 2
@@ -40,11 +36,10 @@ calc:
   motor_norm_half_range: 3
   # accel_modifier: 0.1
 
-
 reward:
   vel_weight: 0.1
   motor_pos_weight: 0.1
   motor_vel_weight: 0.02
   control_weight: 0.03
-  terminal_penalty: 15
+  reward_offset: 15
   # accel_weight: 0.001

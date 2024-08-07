@@ -1,6 +1,4 @@
-import time
 from serial import Serial
-import torch
 import os
 import hydra
 from omegaconf import DictConfig
@@ -12,7 +10,7 @@ def main(cfg: DictConfig):
     MODEL_FILENAME = "model_latest.pkl"
     MODEL_DIR_NAME = "model"
     SRC_PATH = os.path.dirname(__file__)
-    MODEL_DIR_PATH = os.path.join(os.path.split(SRC_PATH)[0], MODEL_DIR_NAME)
+    MODEL_DIR_PATH = os.path.join(os.path.split(SRC_PATH)[0], MODEL_DIR_NAME, cfg.mode.model.name)
 
     os.makedirs(MODEL_DIR_PATH, exist_ok=True)
 

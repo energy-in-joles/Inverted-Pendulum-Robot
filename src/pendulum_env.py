@@ -18,7 +18,7 @@ from util import (
 )
 
 class PendulumEnv(Env):
-    def __init__(self, cfg: DictConfig, ser: Serial):
+    def __init__(self, cfg: DictConfig, ser: Serial, episode_length: int):
         super(PendulumEnv, self).__init__()
         self.cfg = cfg
         self.is_done = False
@@ -26,6 +26,7 @@ class PendulumEnv(Env):
 
         self.action_space = self._create_action_space(cfg.action_space)
         self.observation_space = self._create_observation_space(cfg.observation_space)
+        self.episode_length = episode_length
 
         self.episode_frame = 0
         self.last_t = 0
@@ -50,13 +51,14 @@ class PendulumEnv(Env):
         else:
             terminated = False
 
-        if self.episode_frame >= self.cfg.episode.episode_length - 1:
+        # episode length == -1 means infinite episode length: used for eval
+        if self.episode_length != -1 and self.episode_frame >= self.episode_length - 1:
             truncated = True
         else:
             truncated = False
 
         reward = self._calculate_reward(
-            observation[0], observation[1], observation[2], observation[3], action, terminated
+            observation[0], observation[1], observation[2], observation[3], action
             )
         info = {}
         self.last_t = this_t
@@ -180,22 +182,18 @@ class PendulumEnv(Env):
         norm_motor_pos: float, 
         norm_motor_vel: float, 
         action: float,
-        terminated: bool
     ) -> float:
         vel_weight = self.cfg.reward.vel_weight
         motor_pos_weight = self.cfg.reward.motor_pos_weight
         motor_vel_weight = self.cfg.reward.motor_vel_weight
         control_weight = self.cfg.reward.motor_vel_weight
-        terminal_penalty = self.cfg.reward.terminal_penalty
-        cost = theta ** 2
-        # cost = (theta ** 2 
-        #         + vel_weight * (vel ** 2) 
-        #         + motor_pos_weight * (norm_motor_pos ** 2) 
-        #         + motor_vel_weight * (norm_motor_vel ** 2)
-        #         + control_weight * (action ** 2))
+        reward_offset = self.cfg.reward.reward_offset
+
+        # cost = theta ** 2
+        cost = (theta ** 2 
+                + vel_weight * (vel ** 2) 
+                + motor_pos_weight * (norm_motor_pos ** 2) 
+                + motor_vel_weight * (norm_motor_vel ** 2)
+                + control_weight * (action ** 2))
         
-        if terminated:
-            episodes_left = self.cfg.episode.episode_length - 1 - self.episode_frame
-            cost += episodes_left * terminal_penalty
-        
-        return -cost
+        return reward_offset - cost
