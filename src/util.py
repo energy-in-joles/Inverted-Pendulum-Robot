@@ -1,21 +1,12 @@
 from math import pi
 from collections import namedtuple
 
-PosInfo = namedtuple('PosInfo', ('pos', 'loop_i'))
+PosInfo = namedtuple('PosInfo', ('pos', 'loop_i', 'motor_pos'))
 ENCODER_STEP_PER_REV = 2400
-
-
-# get angular change from last pos to this pos (in radians)
-def calculate_delta_angle(last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
-    delta_loop = this_pos_info.loop_i - last_pos_info.loop_i
-    delta_pos = this_pos_info.pos - last_pos_info.pos # step delta, not including loop info
-    delta_steps = delta_pos + ENCODER_STEP_PER_REV * delta_loop
-
-    return delta_steps / ENCODER_STEP_PER_REV * 2 * pi
 
 # calculate angular velocity from last pos to this pos (in radians per second)
 def calculate_velocity(delta_t: float, last_pos_info: PosInfo, this_pos_info: PosInfo, modifier: float) -> float:
-    delta_angle = calculate_delta_angle(last_pos_info, this_pos_info)
+    delta_angle = _calculate_delta_angle(last_pos_info, this_pos_info)
     return modifier * delta_angle / delta_t
 
 # calculate angular acceleration from last vel to this vel (in radians per second square)
@@ -29,11 +20,12 @@ def get_theta(pos: int) -> float:
     pos -= half_rev
     return pos * pi / half_rev
 
-# DEBUGGING ONLY, SHOULD BE MOVED TO PendulumEnv
-# reward function following pendulum environment in openai
-def calculate_reward(theta: float, vel: float, accel: float, vel_weight: float, accel_weight: float) -> float:
-    return -(theta ** 2 + 0.1 * vel_weight * (vel ** 2) + accel_weight * (accel ** 2))
+def calculate_norm_motor_velocity(delta_t: float, last_norm_motor_vel: float, this_norm_motor_vel: float, modifier: float):
+    return modifier * (this_norm_motor_vel - last_norm_motor_vel) / delta_t
 
+# normalise motor position to be within -2 and 2
+def normalise_motor_pos(motor_pos: int, motor_half_range: int, motor_norm_half_range: int) -> float:
+    return motor_pos / motor_half_range * motor_norm_half_range
 
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     """
@@ -59,15 +51,23 @@ def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     ValueError: If the length of byte_data is not exactly 3 bytes.
     """
     
-    if len(byte_data) != 3:
+    if len(byte_data) != 4:
         raise ValueError("Data length should be exactly 3 bytes for short.")
-    pos = byte_data[0] | (byte_data[1] << 8)
-    loop_i = byte_data[2]
+    pos = byte_data[0] | (byte_data[1] >> 4) << 8
+    loop_i = (byte_data[1] & 0x0F) << 7 | (byte_data[2] >> 1)
+    motor_pos = byte_data[3] | ((byte_data[2] & 0x01) << 8)
+    if loop_i & 0x400: # convert 11-bit number loop
+        loop_i -= 0x800
+    
+    if motor_pos & 0x100: # convert 9-bit motor position
+        motor_pos -= 0x200
 
-    if pos & 0x8000:  # Check if the sign bit is set
-        pos -= 0x10000  # Convert to negative value
+    return pos, loop_i, motor_pos
 
-    if loop_i & 0x80:
-        loop_i -= 0x100
+# get angular change from last pos to this pos (in radians)
+def _calculate_delta_angle(last_pos_info: PosInfo, this_pos_info: PosInfo) -> float:
+    delta_loop = this_pos_info.loop_i - last_pos_info.loop_i
+    delta_pos = this_pos_info.pos - last_pos_info.pos # step delta, not including loop info
+    delta_steps = delta_pos + ENCODER_STEP_PER_REV * delta_loop
 
-    return pos, loop_i
+    return delta_steps / ENCODER_STEP_PER_REV * 2 * pi
