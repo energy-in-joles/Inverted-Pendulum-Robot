@@ -1,9 +1,8 @@
 name: "SAC"
 
 policy: "MlpPolicy"
-use_sde: True
 verbose: 1
 learning_starts: 1024
-sde_sample_freq: 64
+use_sde: True
 use_sde_at_warmup: True
-train_freq: [1, "episode"]
+sde_sample_freq: 64

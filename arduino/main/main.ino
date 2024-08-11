@@ -10,9 +10,10 @@ const int MOTOR_STEP_LIMIT = 200; // 90 DEG limit (800 steps per rev for quarter
 const int TARGET_POS = 10000; // a large value that the motor will never reach (sets direction for motor spin)
 const int MAX_SPEED = 1000;
 
-const int BAUDRATE = 9600;
+const int BAUDRATE = 31250;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
 const int RESET_CMD = 32767;
+const int RESET_ENCODER_CMD = 32766;
 const int POS_PER_REV = 2400;
 
 byte inputBuffer[sizeof(int)];
@@ -23,7 +24,7 @@ Encoder myEnc(ENCODER_PIN_A, ENCODER_PIN_B);
 
 struct EncoderInfo {
   int pos;
-  int loop_i; // store no. of full loops made (start index: 0, range: -127 to 128)
+  int loop_i; // store no. of full loops made (start index: 0, range: -1024 to 1023)
 };
 
 // store raw long position value as int position (0 to 2399 -> clockwise) and loop_i (-127 to 128)
@@ -77,7 +78,7 @@ void setup() {
   stepper.connectToPins(MOTOR_STEP_PIN, MOTOR_DIR_PIN);
   stepper.setCurrentPositionInSteps(0);
   stepper.setSpeedInStepsPerSecond(MAX_SPEED);
-
+  delay(10);
   Serial.println(AUTH_STR);
 }
 
@@ -105,6 +106,13 @@ void loop() {
       Serial.println(AUTH_STR);
       return;
     } 
+    // reset encoder value when close to overflow
+    if (accel_in == RESET_ENCODER_CMD) {
+      isResting = true;
+      accel_in = 0;
+      myEnc.write(0);
+      return;
+    }
     // update python script with positional information
     update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
     for (int i = 0; i < sizeof(outputBuffer); i++) {

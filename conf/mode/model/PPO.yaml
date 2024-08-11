@@ -1,6 +1,6 @@
 name: "PPO"
 
 policy: "MlpPolicy"
-n_steps: 4000
 use_sde: True
+sde_sample_freq: 64
 verbose: 1
