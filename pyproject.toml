@@ -1,7 +1,7 @@
 [project]
 name = "Inverted-Pendulum-Robot"
 version = "1.0.0"
-description = "PPO implementation for inverted pendulum problem, trained and evaluated on physical robot."
+description = "SAC implementation for inverted pendulum problem, trained and evaluated on physical robot."
 readme = "README.md"
 authors = [
     { name = "Joel Ng", email = "nzmjoel@gmail.com" },
@@ -15,6 +15,7 @@ dependencies = [
     "hydra-core == 1.3.2",
     "gymnasium == 0.29.1",
     "stable_baselines3 == 2.3.2"
+    "numba == 0.60.0"
 ]
 requires-python = ">=3.9"
 

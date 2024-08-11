@@ -10,14 +10,14 @@ from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 
 def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
-    if cfg.mode.model.name == "PPO":
-        model = PPO.load(model_file_path)
-    else:
-        model = SAC.load(model_file_path)
-
     env = PendulumEnv(cfg, ser)
     vec_env = DummyVecEnv([lambda: env])
-    obs = vec_env.reset()
+    
+    if cfg.mode.model.name == "PPO":
+        model = PPO.load(model_file_path, device="cpu")
+    else:
+        model = SAC.load(model_file_path, device="cpu")
+
     state = vec_env.reset()
     done = False
 
