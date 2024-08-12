@@ -1,12 +1,12 @@
 defaults:
   - _self_
-  - mode: train
+  - mode: eval
   - override hydra/hydra_logging: disabled
-  - override hydra/hydra_logging: disabled
+  - override hydra/job_logging: disabled
 
-model_filename: "model_100.pkl"
+model_filename: "model_100_3.zip"
 model_dir_name: "model"
-control_frequency: 55 #50 Hz
+control_frequency: 55 #55 Hz
 
 serial:
   in_buffer_size: 4
@@ -23,8 +23,8 @@ encoder:
   encoder_reset_thresh: 900
 
 action_space:
-  half_range: 2
   actual_half_range: 20000
+  half_range: 2
 #  interval: 100
 
 # element position: theta, angular_vel, motor_pos, motor_vel
@@ -42,10 +42,15 @@ calc:
   # accel_modifier: 0.1
 
 reward:
-  vel_weight: 0.05
+  vel_weight: 0.1
   motor_pos_weight: 0.1
   motor_vel_weight: 0.02
-  control_weight: 0.1
+  control_weight: 0.5
   reward_offset: 15
   # accel_weight: 0.001
-  # old control: 0.1, old motor_pos_weight: 0.05
+  # old control: 0.1, old motor_pos_weight: 0.05, vel_weight: 0.05
+
+hydra:
+  output_subdir: null
+  run:
+    dir: .

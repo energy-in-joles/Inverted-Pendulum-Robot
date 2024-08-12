@@ -1,7 +1,7 @@
 [project]
 name = "Inverted-Pendulum-Robot"
 version = "1.0.0"
-description = "PPO implementation for inverted pendulum problem, trained and evaluated on physical robot."
+description = "SAC implementation for inverted pendulum problem, trained and evaluated on physical robot."
 readme = "README.md"
 authors = [
     { name = "Joel Ng", email = "nzmjoel@gmail.com" },
