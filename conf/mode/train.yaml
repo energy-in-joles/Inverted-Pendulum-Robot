@@ -6,7 +6,7 @@ name: "train"
 
 from_scratch: False
 overwrite: False
-new_model_filename: "model_100_4" # if not overwrite, save new model as this
+new_model_filename: "model_80" # if not overwrite, save new model as this
 
 episode_length: 500
 total_timesteps: 1e5

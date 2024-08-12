@@ -4,7 +4,7 @@ defaults:
   - override hydra/hydra_logging: disabled
   - override hydra/job_logging: disabled
 
-model_filename: "model_100_3.zip"
+model_filename: "model_100_4"
 model_dir_name: "model"
 control_frequency: 55 #55 Hz
 

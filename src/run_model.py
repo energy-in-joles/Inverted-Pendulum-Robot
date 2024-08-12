@@ -9,10 +9,11 @@ import logging
 from stable_baselines3.common.vec_env import VecNormalize, DummyVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 
+
 def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
     env = PendulumEnv(cfg, ser)
     vec_env = DummyVecEnv([lambda: env])
-    
+
     if cfg.mode.model.name == "PPO":
         model = PPO.load(model_file_path, device="cpu")
     else:
@@ -25,8 +26,11 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
         while not done:
             action, _states = model.predict(state)
             state, reward, done, info = vec_env.step(action)
+        state = vec_env.reset()
+        done = False
         # if keyboard interrupt
         # env.close()
+
 
 # def train_model(cfg: DictConfig, ser: Serial, model_dir_path: str, model_file_name: str):
 #     iterations = 10000
@@ -43,13 +47,19 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
 #         if done:
 #             pendulumEnv.reset()
 
-def train_model(cfg: DictConfig, ser: Serial, current_model_file_path: str, new_model_file_path: str = ""):
+
+def train_model(
+    cfg: DictConfig,
+    ser: Serial,
+    current_model_file_path: str,
+    new_model_file_path: str = ""
+):
     # logging.basicConfig(filename='ppo_training.log', level=logging.INFO)
     # # Custom callback to log reward values
     # class CustomCallback(BaseCallback):
     #     def __init__(self, verbose=0):
     #         super(CustomCallback, self).__init__(verbose)
-        
+
     #     def _on_step(self) -> bool:
     #         env = self.locals.get('env')
     #         if env is not None:
@@ -62,22 +72,17 @@ def train_model(cfg: DictConfig, ser: Serial, current_model_file_path: str, new_
     model_cfg = cfg.mode.model
     if cfg.mode.from_scratch:
         if model_cfg.name == "PPO":
-            model = PPO(
-                model_cfg.policy, 
-                env, 
-                verbose=model_cfg.verbose,  
-                device=device
-                )
+            model = PPO(model_cfg.policy, env, verbose=model_cfg.verbose, device=device)
         else:
             model = SAC(
                 model_cfg.policy,
                 env,
-                verbose=model_cfg.verbose, 
-                use_sde=model_cfg.use_sde, 
-                sde_sample_freq=model_cfg.sde_sample_freq, 
-                use_sde_at_warmup=model_cfg.use_sde_at_warmup, 
-                learning_starts=model_cfg.learning_starts, 
-                device="cpu"
+                verbose=model_cfg.verbose,
+                use_sde=model_cfg.use_sde,
+                sde_sample_freq=model_cfg.sde_sample_freq,
+                use_sde_at_warmup=model_cfg.use_sde_at_warmup,
+                learning_starts=model_cfg.learning_starts,
+                device="cpu",
             )
     else:
         if model_cfg.name == "PPO":
@@ -85,7 +90,9 @@ def train_model(cfg: DictConfig, ser: Serial, current_model_file_path: str, new_
         else:
             model = SAC.load(current_model_file_path, env=env, device="cpu")
 
-    model.learn(total_timesteps=cfg.mode.total_timesteps) # , callback=CustomCallback())
+    model.learn(
+        total_timesteps=cfg.mode.total_timesteps
+    )  # , callback=CustomCallback())
 
     if cfg.mode.overwrite:
         model.save(current_model_file_path)
