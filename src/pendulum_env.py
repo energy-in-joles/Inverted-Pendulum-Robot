@@ -74,7 +74,6 @@ class PendulumEnv(Env):
         info = {}
         self.last_t = this_t
         self.last_pos_info = this_pos_info
-        # self.last_vel = observation[2]
         self.episode_frame += 1
         return observation, reward, terminated, truncated, info
 
@@ -160,17 +159,6 @@ class PendulumEnv(Env):
         pos, loop_i, motor_pos = interpret_encoder_info(data_in)
         self.last_pos_info = PosInfo(pos, loop_i, motor_pos)
 
-        # second episode frame: update last_pos_info, last_t and last_vel
-        # self.ser.write(ZERO_ACCEL_STR)
-        # data_in = self.ser.read(self.cfg.serial.in_buffer_size)
-        # this_t = time.time()
-        # pos, loop_i, motor_pos = interpret_encoder_info(data_in)
-        # this_pos_info = PosInfo(pos, loop_i, motor_pos)
-        # this_vel = calculate_velocity(this_t - self.last_t, self.last_pos_info, this_pos_info, self.cfg.calc.vel_modifier)
-        # self.last_t = this_t
-        # self.last_pos_info = this_pos_info
-        # self.last_vel = this_vel
-
     # decode action in normalised continuous action space to actual acceleration value
     def _action_to_acceleration(self, action: float) -> int:
         mult = self.cfg.action_space.actual_half_range / (
@@ -199,7 +187,7 @@ class PendulumEnv(Env):
         this_vel = calculate_velocity(
             delta_t, self.last_pos_info, this_pos_info, self.cfg.calc.vel_modifier
         )
-        # this_accel = calculate_acceleration(delta_t, self.last_vel, this_vel, self.cfg.calc.accel_modifier)
+
         this_motor_pos = normalise_motor_pos(
             this_pos_info.motor_pos,
             self.cfg.calc.motor_half_range,

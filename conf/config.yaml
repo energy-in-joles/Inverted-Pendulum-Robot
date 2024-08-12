@@ -25,7 +25,6 @@ encoder:
 action_space:
   actual_half_range: 20000
   half_range: 2
-#  interval: 100
 
 # element position: theta, angular_vel, motor_pos, motor_vel
 observation_space:
@@ -39,7 +38,6 @@ calc:
   motor_half_range: 300
   motor_half_limit: 200
   motor_norm_half_range: 3
-  # accel_modifier: 0.1
 
 reward:
   vel_weight: 0.1
@@ -47,7 +45,6 @@ reward:
   motor_vel_weight: 0.02
   control_weight: 0.5
   reward_offset: 15
-  # accel_weight: 0.001
   # old control: 0.1, old motor_pos_weight: 0.05, vel_weight: 0.05
 
 hydra:
