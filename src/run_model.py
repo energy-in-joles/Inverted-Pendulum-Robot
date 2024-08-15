@@ -101,3 +101,5 @@ def train_model(
         model.save(new_model_file_path)
 
     env.close()
+
+    print(f"To visualize training in TensorBoard, run: tensorboard --logdir {LOGS_DIR_PATH}")
