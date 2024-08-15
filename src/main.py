@@ -17,6 +17,9 @@ def main(cfg: DictConfig):
 
     model_file_path = os.path.join(MODEL_DIR_PATH, cfg.model_filename)
 
+    LOGS_DIR_PATH = os.path.join(MODEL_DIR_PATH, cfg.log_dir_name)
+    os.makedirs(LOGS_DIR_PATH, exist_ok=True)
+
     ser = Serial(
         port=cfg.serial.port, baudrate=cfg.serial.baudrate, timeout=cfg.serial.timeout
     )
