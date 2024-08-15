@@ -92,7 +92,7 @@ def train_model(
             model = SAC.load(current_model_file_path, env=env, device="cpu")
 
     model.learn(
-        total_timesteps=cfg.mode.total_timesteps
+        total_timesteps=cfg.mode.total_timesteps, tb_log_name=cfg.log_run_name
     )  # , callback=CustomCallback())
 
     if cfg.mode.overwrite:
