@@ -6,7 +6,7 @@ defaults:
 
 model_filename: "model_100_4"
 model_dir_name: "model"
-tensorboard_log_dir: "logs"
+log_dir_name: "logs"
 control_frequency: 55 #55 Hz
 
 serial:
