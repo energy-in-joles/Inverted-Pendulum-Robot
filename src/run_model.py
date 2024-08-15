@@ -82,7 +82,8 @@ def train_model(
                 sde_sample_freq=model_cfg.sde_sample_freq,
                 use_sde_at_warmup=model_cfg.use_sde_at_warmup,
                 learning_starts=model_cfg.learning_starts,
-                device="cpu",
+                device="cpu"
+                tensorboard_log=cfg.tensorboard_log_dir,
             )
     else:
         if model_cfg.name == "PPO":
