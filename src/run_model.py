@@ -91,6 +91,8 @@ def train_model(
         else:
             model = SAC.load(current_model_file_path, env=env, device="cpu")
 
+    print(f"To visualize training in TensorBoard, run: tensorboard --logdir {LOGS_DIR_PATH}, then go to http://localhost:6006/ on browser")
+    
     model.learn(
         total_timesteps=cfg.mode.total_timesteps, tb_log_name=cfg.log_run_name
     )  # , callback=CustomCallback())
@@ -101,5 +103,3 @@ def train_model(
         model.save(new_model_file_path)
 
     env.close()
-
-    print(f"To visualize training in TensorBoard, run: tensorboard --logdir {LOGS_DIR_PATH}")
