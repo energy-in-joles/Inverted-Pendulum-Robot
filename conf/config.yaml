@@ -27,13 +27,14 @@ serial:
 
 encoder:
   reset_encoder_t: 20
-  encoder_reset_thresh: 900
+  encoder_reset_thresh: 900 # number of rotations in encoder before resetting encoder
+  # if rotations in one direction is too large and not reset, the encoder data will overflow.
 
 action_space:
   actual_half_range: 20000
   half_range: 2
 
-# element position: theta, angular_vel, motor_pos, motor_vel
+# element position: cos theta, sin theta, angular_vel, motor_pos, motor_vel
 observation_space:
   lower_bound: [-1, -1, -10, -3, -4]
   upper_bound: [1, 1, 10, 3, 4]
