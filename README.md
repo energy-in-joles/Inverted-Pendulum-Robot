@@ -29,7 +29,7 @@ Follows the standard Gymnasium class format. Defined below is the observation sp
 
 - $\theta$: angular position of pendulum. 0 at the top and normalised between $[-\pi,\pi]$.
 - $\dot{\theta}$: angular velocity of pendulum. Experimentally bounded between $[-10,10]$, then normalised to between $[-2, 2]$.
-- $\alpha$: motor position (measured in steps instead of angle). Steps range limited to 90 degrees left and right. Normalised between $[-3,3]$.
+- $\alpha$: motor position (measured in steps instead of angle). Steps range physically limited to 90 degrees left and right or $[-200, 200]$ step range. However, observation space spans further between $[-300, 300]$ to account for the motor exceeding the limit slightly. The range is then normalised between $[-3,3]$.
 - $\dot{\alpha}$: motor velocity (steps per second). Experimentally bounded between $[-4, 4]$, then normalised to between $[-1, 1]$
 - $\ddot{\alpha}$: motor acceleration (steps per second squared). Control input into the system. Bounded between $[-20000,20000]$ and normalised between $[-2, 2]$.
 
