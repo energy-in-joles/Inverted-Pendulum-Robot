@@ -13,9 +13,9 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
     vec_env = DummyVecEnv([lambda: env])
 
     if cfg.model.name == "PPO":
-        model = PPO.load(model_file_path, device="cpu")
+        model = PPO.load(model_file_path, device=cfg.mode.device)
     else:
-        model = SAC.load(model_file_path, device="cpu")
+        model = SAC.load(model_file_path, device=cfg.mode.device)
 
     state = vec_env.reset()
     done = False
@@ -40,7 +40,7 @@ def train_model(
     log_dir: str,
     new_model_file_path: str = "",
 ):
-    # override tensorboard logging
+    # run training with tensoboard logging
     class TensorboardLogging(BaseCallback):
         def __init__(self, log_dir, run_name, verbose=0):
             super(TensorboardLogging, self).__init__(verbose)
@@ -53,7 +53,6 @@ def train_model(
         def _on_step(self) -> bool:
             return True
 
-    # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     env = PendulumEnv(cfg, ser)
     model_cfg = cfg.model
     if cfg.mode.from_scratch:
@@ -62,7 +61,7 @@ def train_model(
                 model_cfg.policy,
                 env,
                 verbose=model_cfg.verbose,
-                device="cpu",
+                device=cfg.mode.device,
             )
         else:
             model = SAC(
@@ -73,13 +72,13 @@ def train_model(
                 sde_sample_freq=model_cfg.sde_sample_freq,
                 use_sde_at_warmup=model_cfg.use_sde_at_warmup,
                 learning_starts=model_cfg.learning_starts,
-                device="cpu",
+                device=cfg.mode.device,
             )
     else:
         if model_cfg.name == "PPO":
-            model = PPO.load(current_model_file_path, env=env, device="cpu")
+            model = PPO.load(current_model_file_path, env=env, device=cfg.mode.device)
         else:
-            model = SAC.load(current_model_file_path, env=env, device="cpu")
+            model = SAC.load(current_model_file_path, env=env, device=cfg.mode.device)
 
     if cfg.logging.enabled:
         print(

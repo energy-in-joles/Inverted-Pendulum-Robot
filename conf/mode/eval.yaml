@@ -1,2 +1,4 @@
 name: "eval"
+
+device: "cpu" # use cuda or cpu
 episode_length: -1
