@@ -46,7 +46,7 @@ $\left[\ddot{\alpha}\right]$
 `ndarray` of size (1,) containing motor acceleration value. Continuous action space.
 
 ### Reward Function ###
-$\gamma-\left(\theta^2+C_2\times\dot{\theta}^2+C_3\times\alpha^2+C_4\times\dot{\alpha}^2+C_5\times\ddot{\alpha}^2\right)$
+$\gamma-\left(\theta^2+C_1\times\dot{\theta}^2+C_2\times\alpha^2+C_3\times\dot{\alpha}^2+C_4\times\ddot{\alpha}^2\right)$
 
 $\gamma$: reward offset value (offset) to ensure that reward is always positive. 
 
