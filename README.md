@@ -41,7 +41,7 @@ $\left[\cos{\theta}, \sin{\theta}, \dot{\theta}, \alpha, \dot{\alpha}\right]$
 `ndarray` of size (5,) containing 5 continuous observation values. Using $\cos$ and $\sin$ values of $\theta$ experimentally showed better convergence rates than just $\theta$.
 
 ### Action Space ###
-$[\ddot{\alpha}]$
+$\left[\ddot{\alpha}\right]$
 
 `ndarray` of size (1,) containing motor acceleration value. Continuous action space.
 
