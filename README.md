@@ -36,7 +36,7 @@ Follows the standard Gymnasium class format. Defined below is the observation sp
 Note that all values are continuous.
 
 ### Observation Space ###
-$[\cos{\theta}, \; \sin{\theta}, \; \dot{\theta}, \; \alpha, \; \dot{\alpha}]$
+$[\cos{\theta}, \sin{\theta}, \dot{\theta}, \alpha, \dot{\alpha}]$
 
 `ndarray` of size (5,) containing 5 continuous observation values. Using $\cos$ and $\sin$ values of $\theta$ experimentally showed better convergence rates than just $\theta$.
 
