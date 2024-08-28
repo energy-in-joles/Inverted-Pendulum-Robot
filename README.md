@@ -54,6 +54,8 @@ If reward was $-\inf$ to $0$, episodes with early termination would generate a h
 
 ## Usage
 
+### Configuration
+
 The script provides a high level of flexibility for training and evaluating the model. Configurations are stored in the `conf` folder, organised in the following manner:
 1. `config.yaml`
     - model selection (PPO or SAC)
@@ -72,11 +74,17 @@ The script provides a high level of flexibility for training and evaluating the 
 4. `/model` (`PPO.yaml` and  `SAC.yaml`) config files:
     - model weights
 
-To run the code, first build dependencies in the root directory with:
+### Install and Run
+
+1. To run the code, first build dependencies in the root directory with:
 ```pip install -e .```
 
-Then run the script, remembering to set the desired mode (train or eval):
+2. Upload the Arduino code in `/robot/arduino/main/main.ino` to the Arduino board.
+
+3. Connect the robot to the PC and run the script, remembering to set the mode to `train`:
 ```python src/main.py```
+
+4. The trained model will then be stored in `/model`, where it can be trained further or evaluated.
 
 ## Credits
 We largely referred to the following resources for guidance:
