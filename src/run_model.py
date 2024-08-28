@@ -19,13 +19,17 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
 
     state = vec_env.reset()
     done = False
-
-    while True:
-        while not done:
-            action, _states = model.predict(state)
-            state, reward, done, info = vec_env.step(action)
-        state = vec_env.reset()
-        done = False
+    try:
+        while True:
+            while not done:
+                action, _states = model.predict(state)
+                state, reward, done, info = vec_env.step(action)
+            state = vec_env.reset()
+            done = False
+    except KeyboardInterrupt:
+        vec_env.close()
+    finally:
+        print("Program terminated.")
 
 
 def train_model(
