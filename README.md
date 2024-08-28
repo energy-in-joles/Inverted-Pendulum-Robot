@@ -36,7 +36,7 @@ Follows the standard Gymnasium class format. Defined below is the observation sp
 Note that all values are continuous.
 
 ### Observation Space ###
-$[\cos{\theta}, \sin{\theta}, \dot{\theta}, \alpha, \dot{\alpha}]$
+$\left[\cos{\theta}, \sin{\theta}, \dot{\theta}, \alpha, \dot{\alpha}\right]$
 
 `ndarray` of size (5,) containing 5 continuous observation values. Using $\cos$ and $\sin$ values of $\theta$ experimentally showed better convergence rates than just $\theta$.
 
@@ -46,7 +46,7 @@ $[\ddot{\alpha}]$
 `ndarray` of size (1,) containing motor acceleration value. Continuous action space.
 
 ### Reward Function ###
-$\gamma-(\theta^2+C_2\times\dot{\theta}^2+C_3\times\alpha^2+C_4\times\dot{\alpha}^2+C_5\times\ddot{\alpha}^2)$
+$\gamma-\left(\theta^2+C_2\times\dot{\theta}^2+C_3\times\alpha^2+C_4\times\dot{\alpha}^2+C_5\times\ddot{\alpha}^2\right)$
 
 $\gamma$: reward offset value (offset) to ensure that reward is always positive. 
 
