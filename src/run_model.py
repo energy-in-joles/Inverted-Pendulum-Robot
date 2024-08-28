@@ -27,9 +27,10 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
             state = vec_env.reset()
             done = False
     except KeyboardInterrupt:
-        vec_env.close()
+        print("Terminating program...")
     finally:
-        print("Program terminated.")
+        vec_env.close()
+        
 
 
 def train_model(
