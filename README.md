@@ -64,8 +64,10 @@ The script provides a high level of flexibility for training and evaluating the 
     - toggle logging with tensorboard
 2. `/mode/train.yaml`:
     - new model file configuration 
+    - device config (cuda or cpu)
     - training total timesteps and episode length
 3. `/mode/eval.yaml`:
+    - device config (cuda or cpu)
     - episode length set to -1 for infinite episode length
 4. `/model` (`PPO.yaml` and  `SAC.yaml`) config files:
     - model weights
