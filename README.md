@@ -60,7 +60,7 @@ If reward was $-\inf$ to $0$, episodes with early termination would generate a h
 The environment terminates when the stepper motor exceeds the allowed range of motion (more than 90&deg; left or right from the zero position).
 
 ### Truncation
-The environment is truncated after 500 timesteps, but this can be adjusted in `/conf/mode/train.yaml`
+The environment is truncated after 500 timesteps, but this can be adjusted in `/conf/mode/train.yaml`.
 
 ## Usage
 
