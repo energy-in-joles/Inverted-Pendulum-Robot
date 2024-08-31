@@ -1,7 +1,7 @@
 # Inverted-Pendulum-Robot (Furuta Pendulum)
 
 <p align="center">
-  <img src="robot.png" />
+  <img src="robot.jpg" />
 </p>
 
 ## Introduction
