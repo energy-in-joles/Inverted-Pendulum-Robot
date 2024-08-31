@@ -57,7 +57,7 @@ $\gamma$: reward offset value (offset) to ensure that reward is always positive.
 If reward was $-\inf$ to $0$, episodes with early termination would generate a higher reward (because they would accumulate smaller negative reward), resulting in a faulty reward system. Hence, the offset aims to prevent this issue. Constants $C$ are used to adjust the reward function weightage and are defined in the `/conf/config.yaml`.
 
 ### Termination
-The environment terminates when the stepper motor exceeds the allowed range of motion (more than 90&deg; left or right from the centre).
+The environment terminates when the stepper motor exceeds the allowed range of motion (more than 90&deg; left or right from the zero position).
 
 ### Truncation
 The environment is truncated after 500 timesteps, but this can be adjusted in `/conf/mode/train.yaml`
