@@ -33,7 +33,7 @@ Follows the standard Gymnasium class format. Defined below is the observation sp
 
 - $\theta$: angular position of pendulum. 0 at the top and normalised between $[-\pi,\pi]$.
 - $\dot{\theta}$: angular velocity of pendulum. Experimentally bounded between $[-10,10]$, then normalised to between $[-2, 2]$.
-- $\alpha$: motor position (measured in steps instead of angle). Steps range physically limited to 90 degrees left and right or $[-200, 200]$ step range. However, observation space spans further between $[-300, 300]$ to account for the motor exceeding the limit slightly. The range is then normalised between $[-3,3]$.
+- $\alpha$: motor position (measured in steps instead of angle). Steps range physically limited to 90&deg; left and right or $[-200, 200]$ step range. However, observation space spans further between $[-300, 300]$ to account for the motor exceeding the limit slightly. The range is then normalised between $[-3,3]$.
 - $\dot{\alpha}$: motor velocity (steps per second). Experimentally bounded between $[-4, 4]$, then normalised to between $[-1, 1]$
 - $\ddot{\alpha}$: motor acceleration (steps per second squared). Control input into the system. Bounded between $[-20000,20000]$ and normalised between $[-2, 2]$.
 
@@ -55,6 +55,12 @@ $\gamma-\left(\theta^2+C_1\times\dot{\theta}^2+C_2\times\alpha^2+C_3\times\dot{\
 $\gamma$: reward offset value (offset) to ensure that reward is always positive. 
 
 If reward was $-\inf$ to $0$, episodes with early termination would generate a higher reward (because they would accumulate smaller negative reward), resulting in a faulty reward system. Hence, the offset aims to prevent this issue. Constants $C$ are used to adjust the reward function weightage and are defined in the `/conf/config.yaml`.
+
+### Termination
+The environment terminates when the stepper motor exceeds the allowed range of motion (more than 90&deg; left or right from the centre).
+
+### Truncation
+The environment is truncated after 500 timesteps, but this can be adjusted in `/conf/mode/train.yaml`
 
 ## Usage
 
