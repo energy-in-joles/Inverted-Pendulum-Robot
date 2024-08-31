@@ -1,5 +1,7 @@
 # Inverted-Pendulum-Robot (Furuta Pendulum)
 
+![robot](robot.png)
+
 ## Introduction
 
 A Furuta Pendulum is a control problem which involves a driven arm (free-rotating in the vertical plane) attached to a horizontal rotating plane. The goal of the robot is to balance the arm in the vertical position. This is a more advanced adaptation of the classic [cartpole problem](https://gymnasium.farama.org/environments/classic_control/cart_pole/), where it includes swing-up (swinging the arm to the vertical position in the first place).
