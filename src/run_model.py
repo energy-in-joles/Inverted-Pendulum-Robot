@@ -30,7 +30,6 @@ def eval_model(cfg: DictConfig, ser: Serial, model_file_path: str):
         print("Terminating program...")
     finally:
         vec_env.close()
-        
 
 
 def train_model(
@@ -79,19 +78,23 @@ def train_model(
             model = PPO.load(current_model_file_path, env=env, device=cfg.mode.device)
         else:
             model = SAC.load(current_model_file_path, env=env, device=cfg.mode.device)
-
-    if cfg.logging.enabled:
-        print(
-            f'To visualize training logs, run: tensorboard --logdir="{log_dir}", then go to http://localhost:6006/ on browser.'
-        )
-        callback = TensorboardLogging(log_dir=log_dir, run_name=cfg.logging.run_name)
-        model.learn(total_timesteps=cfg.mode.total_timesteps, callback=callback)
-    else:
-        model.learn(total_timesteps=cfg.mode.total_timesteps)
+    try:
+        if cfg.logging.enabled:
+            print(
+                f'To visualize training logs, run: tensorboard --logdir="{log_dir}", then go to http://localhost:6006/ on browser.'
+            )
+            callback = TensorboardLogging(
+                log_dir=log_dir, run_name=cfg.logging.run_name
+            )
+            model.learn(total_timesteps=cfg.mode.total_timesteps, callback=callback)
+        else:
+            model.learn(total_timesteps=cfg.mode.total_timesteps)
+    except KeyboardInterrupt:
+        print("Terminating program...")
+    finally:
+        env.close()
 
     if cfg.mode.overwrite:
         model.save(current_model_file_path)
     else:
         model.save(new_model_file_path)
-
-    env.close()

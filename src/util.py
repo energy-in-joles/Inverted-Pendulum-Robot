@@ -44,42 +44,38 @@ def normalise_motor_pos(
     return motor_pos / motor_half_range * motor_norm_half_range
 
 
+# interpret output buffer from robot:
+# encoder position arranged in little endian (23 bits)
+# motor position arranged in big endian (9 bits)
+# convert to signed value
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
-    """
-    Interprets a 3-byte sequence to extract encoder information.
-
-    This function extracts two values from a 3-byte input:
-    - A 16-bit position value, which may be negative.
-    - An 8-bit loop index value, which may also be negative.
-
-    Parameters:
-    byte_data (bytes): A bytes object containing exactly 3 bytes of data.
-                       The bytes should be in the order:
-                       - The first byte for the low byte of the position value.
-                       - The second byte for the high byte of the position value.
-                       - The third byte for the loop index value.
-
-    Returns:
-    tuple[int, int]: A tuple containing two integers:
-                     - The interpreted 16-bit position value, adjusted for signed representation.
-                     - The interpreted 8-bit loop index value, adjusted for signed representation.
-
-    Raises:
-    ValueError: If the length of byte_data is not exactly 3 bytes.
-    """
-
     if len(byte_data) != 4:
         raise ValueError("Data length should be exactly 3 bytes for short.")
-    pos = byte_data[0] | (byte_data[1] >> 4) << 8
-    loop_i = (byte_data[1] & 0x0F) << 7 | (byte_data[2] >> 1)
-    motor_pos = byte_data[3] | ((byte_data[2] & 0x01) << 8)
-    if loop_i & 0x400:  # convert 11-bit number loop
-        loop_i -= 0x800
+    encoder_pos = byte_data[0] | byte_data[1] << 8 | ((byte_data[2] & 0xFC) << 14)
+    motor_pos = byte_data[3] | ((byte_data[2] & 0x03) << 8)
 
-    if motor_pos & 0x100:  # convert 9-bit motor position
-        motor_pos -= 0x200
+    if encoder_pos & 0x200000:
+        encoder_pos -= 0x400000
+    if motor_pos & 0x200:  # convert 9-bit motor position
+        motor_pos -= 0x400
+
+    pos, loop_i = _process_raw_encoder_pos(encoder_pos)
 
     return pos, loop_i, motor_pos
+
+
+# split raw encoder position into a wrapped pos value (0 to 2400) and loop_i representing the loop_index (number of full revolutions from center)
+def _process_raw_encoder_pos(encoder_pos: int):
+    # Normalize position to be within range [0, ENCODER_STEP_PER_REV)
+    pos = encoder_pos % ENCODER_STEP_PER_REV
+    if pos < 0:
+        pos += ENCODER_STEP_PER_REV
+
+    # Calculate loop index
+    loop_i = encoder_pos // ENCODER_STEP_PER_REV
+    if pos < 0:
+        loop_i -= 1
+    return pos, loop_i
 
 
 # get angular change from last pos to this pos (in radians)

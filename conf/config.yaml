@@ -1,11 +1,11 @@
 defaults:
   - _self_
-  - mode: eval
+  - mode: train
   - model: SAC
   - override hydra/hydra_logging: disabled
   - override hydra/job_logging: disabled
 
-model_filename: "model_100_4"
+model_filename: "model_100_5"
 model_dir_name: "model"
 control_frequency: 55 #55 Hz
 
@@ -27,7 +27,7 @@ serial:
 
 encoder:
   reset_encoder_t: 20
-  encoder_reset_thresh: 900 # number of rotations in encoder before resetting encoder
+  encoder_reset_thresh: 600 # number of rotations in encoder before resetting encoder
   # if rotations in one direction is too large and not reset, the encoder data will overflow.
 
 action_space:
@@ -49,7 +49,7 @@ calc:
 
 reward:
   vel_weight: 0.1
-  motor_pos_weight: 0.2
+  motor_pos_weight: 0.4
   motor_vel_weight: 0.02
   control_weight: 0.2
   reward_offset: 15

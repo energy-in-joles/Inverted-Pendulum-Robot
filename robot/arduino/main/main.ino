@@ -14,36 +14,12 @@ const int BAUDRATE = 31250;
 const String AUTH_STR = "<ready>"; // matching auth string in python script
 const int RESET_CMD = 32767;
 const int RESET_ENCODER_CMD = 32766;
-const int POS_PER_REV = 2400;
 
 byte inputBuffer[sizeof(int)];
 byte outputBuffer[4];
 
 FlexyStepper stepper;
 Encoder myEnc(ENCODER_PIN_A, ENCODER_PIN_B);
-
-struct EncoderInfo {
-  int pos;
-  int loop_i; // store no. of full loops made (start index: 0, range: -1024 to 1023)
-};
-
-// store raw long position value as int position (0 to 2399 -> clockwise) and loop_i (-127 to 128)
-EncoderInfo update_encoder_info(long newPosition) {
-    EncoderInfo encoderInfo;
-
-    // Calculate position within one revolution
-    encoderInfo.pos = ((newPosition % POS_PER_REV) + POS_PER_REV) % POS_PER_REV;
-
-    // Calculate the number of full revolutions
-    encoderInfo.loop_i = newPosition / POS_PER_REV;
-
-    // Handle negative values to ensure proper loop index calculation
-    if (newPosition < 0 && newPosition % POS_PER_REV != 0) {
-        encoderInfo.loop_i--;
-    }
-
-    return encoderInfo;
-}
 
 // read serial data from python script: 2 byte signed acceleration value
 int read_serial() {
@@ -56,11 +32,11 @@ int read_serial() {
 }
 
 // prepare output buffer to send position and loop index data to python script
-// buffer: 12 bits for encoder position (little endian), 11 bits for loop_i (big endian), 9 bits for stepper pos
-void update_output_buffer(byte *outputBuffer, EncoderInfo encoderInfo, int currentStepperPos) {
-  outputBuffer[0] = (encoderInfo.pos >> 0) & 0xFF;
-  outputBuffer[1] = (encoderInfo.pos >> 4) & 0xF0 | (encoderInfo.loop_i >> 7) & 0x0F;
-  outputBuffer[2] = (encoderInfo.loop_i << 1) & 0xFE | (currentStepperPos >> 9) & 0x01 ; // get MSB
+// buffer: 22 bits for encoder position (little endian), 12 bits for stepper pos
+void update_output_buffer(byte *outputBuffer, long encoderPos, int currentStepperPos) {
+  outputBuffer[0] = (encoderPos >> 0) & 0xFF;
+  outputBuffer[1] = (encoderPos >> 8) & 0xFF;
+  outputBuffer[2] = (encoderPos >> 14) & 0xFC | (currentStepperPos >> 10) & 0x03;
   outputBuffer[3] = (currentStepperPos >> 0) &0xFF;
 }
 
@@ -82,20 +58,12 @@ void setup() {
   Serial.println(AUTH_STR);
 }
 
-long oldPosition  = -999;
 int accel_in = 0;
 bool isResting = true; // prevent motor from running at start without any input
 bool isGoingRight = false;
 int currentStepperPos = 0;
 
 void loop() {
-  long newPosition = myEnc.read();
-  if (newPosition != oldPosition) {
-    oldPosition = newPosition;
-  }
-  EncoderInfo encoderInfo = update_encoder_info(newPosition);
-
-  update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
   if (Serial.available() > 0) {
     accel_in = read_serial();
     // reset stepper back to start position
@@ -113,8 +81,10 @@ void loop() {
       myEnc.write(0);
       return;
     }
+
+    long newPosition = myEnc.read();
     // update python script with positional information
-    update_output_buffer(outputBuffer, encoderInfo, currentStepperPos);
+    update_output_buffer(outputBuffer, newPosition, currentStepperPos);
     for (int i = 0; i < sizeof(outputBuffer); i++) {
       Serial.write(outputBuffer[i]);
     }
