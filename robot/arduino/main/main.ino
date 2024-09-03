@@ -32,11 +32,11 @@ int read_serial() {
 }
 
 // prepare output buffer to send position and loop index data to python script
-// buffer: 22 bits for encoder position (little endian), 12 bits for stepper pos
+// buffer: 22 bits for encoder position (little endian), 10 bits for stepper pos
 void update_output_buffer(byte *outputBuffer, long encoderPos, int currentStepperPos) {
   outputBuffer[0] = (encoderPos >> 0) & 0xFF;
   outputBuffer[1] = (encoderPos >> 8) & 0xFF;
-  outputBuffer[2] = (encoderPos >> 14) & 0xFC | (currentStepperPos >> 10) & 0x03;
+  outputBuffer[2] = (encoderPos >> 14) & 0xFC | (currentStepperPos >> 8) & 0x03;
   outputBuffer[3] = (currentStepperPos >> 0) &0xFF;
 }
 

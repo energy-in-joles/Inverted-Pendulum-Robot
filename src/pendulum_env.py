@@ -102,8 +102,7 @@ class PendulumEnv(Env):
 
         Args:
             ser (serial.Serial): The serial object for communication with the Arduino.
-            max_startup_time (int, optional): Maximum time to wait for the Arduino to be ready, in seconds. Default is 5 seconds.
-            auth_str (str, optional): The authentication string sent by the Arduino to indicate it is ready. Default is "<ready>".
+            print_ready: toggle printing "arduino is ready" in terminal.
 
         Raises:
             Exception: If the Arduino does not respond with the authentication string within the allowed startup time.

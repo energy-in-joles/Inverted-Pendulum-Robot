@@ -45,21 +45,24 @@ def normalise_motor_pos(
 
 
 # interpret output buffer from robot:
-# encoder position arranged in little endian (23 bits)
-# motor position arranged in big endian (9 bits)
+# encoder position arranged in little endian (22 bits)
+# motor position arranged in big endian (10 bits)
 # convert to signed value
 def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
     if len(byte_data) != 4:
-        raise ValueError("Data length should be exactly 3 bytes for short.")
+        raise ValueError("Data length should be exactly 4 bytes.")
+
     encoder_pos = byte_data[0] | byte_data[1] << 8 | ((byte_data[2] & 0xFC) << 14)
     motor_pos = byte_data[3] | ((byte_data[2] & 0x03) << 8)
 
     if encoder_pos & 0x200000:
         encoder_pos -= 0x400000
-    if motor_pos & 0x200:  # convert 9-bit motor position
+    if motor_pos & 0x200:  # convert to signed
         motor_pos -= 0x400
 
     pos, loop_i = _process_raw_encoder_pos(encoder_pos)
+
+    print(motor_pos)
 
     return pos, loop_i, motor_pos
 

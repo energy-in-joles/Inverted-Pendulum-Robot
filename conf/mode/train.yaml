@@ -2,7 +2,7 @@ name: "train"
 
 from_scratch: False # note that modeL_filename in config.yaml is irrelevant when this is True
 overwrite: False
-new_model_filename: "model_100_6" # if not overwrite, save new model as this
+new_model_filename: "model_100_5" # if not overwrite, save new model as this
 
 device: "cpu" # use cuda or cpu
 episode_length: 500
