@@ -3,6 +3,7 @@ import os
 from omegaconf import DictConfig
 from pendulum_env import PendulumEnv
 from stable_baselines3 import PPO, SAC
+from typing import Union
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.callbacks import BaseCallback
 from stable_baselines3.common.logger import configure
@@ -94,7 +95,31 @@ def train_model(
     finally:
         env.close()
 
-    if cfg.mode.overwrite:
+    _save_trained_model(
+        model, current_model_file_path, new_model_file_path, cfg.mode.overwrite
+    )
+
+
+def _save_trained_model(
+    model: Union[PPO, SAC],
+    current_model_file_path: str,
+    new_model_file_path: str,
+    is_overwrite: bool,
+):
+    # for overwrite false option: ensure that we don't overwrite any files that alr exists
+    def get_new_unique_file_name(model_file_path: str, i: int = 0):
+        base, ext = os.path.splitext(model_file_path)
+        if not ext:
+            ext = ".zip"
+            model_file_path = f"{base}{ext}"
+        if os.path.exists(model_file_path):
+            model_file_path = f"{base}_1{ext}"
+            return get_new_unique_file_name(model_file_path)
+        else:
+            return model_file_path
+
+    if is_overwrite:
         model.save(current_model_file_path)
     else:
-        model.save(new_model_file_path)
+        test = get_new_unique_file_name(new_model_file_path)
+        model.save(test)

@@ -62,8 +62,6 @@ def interpret_encoder_info(byte_data: bytes) -> tuple[int, int]:
 
     pos, loop_i = _process_raw_encoder_pos(encoder_pos)
 
-    print(motor_pos)
-
     return pos, loop_i, motor_pos
 
 
