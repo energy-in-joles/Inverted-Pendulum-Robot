@@ -1,8 +1,13 @@
 name: "train"
 
-from_scratch: False # note that modeL_filename in config.yaml is irrelevant when this is True
+from_scratch: False # note that model_filename in config.yaml is irrelevant when this is True
+
+# When new_model_filename is set (ie not set as ""), the trained model will save as new_model_filename
+# if new_model_filename set as "", the trained model will attempt to save as model_filename in config.yaml
+# if overwrite is set as True, it will overwrite the target filename
+# otherwise, it will append "_1" to the back of the name to create a unique filename
 overwrite: False
-new_model_filename: "model_100_5" # if not overwrite, save new model as this
+new_model_filename: "model_100_5"
 
 device: "cpu" # use cuda or cpu
 episode_length: 500

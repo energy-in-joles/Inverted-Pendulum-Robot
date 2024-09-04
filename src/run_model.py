@@ -107,19 +107,21 @@ def _save_trained_model(
     is_overwrite: bool,
 ):
     # for overwrite false option: ensure that we don't overwrite any files that alr exists
-    def get_new_unique_file_name(model_file_path: str, i: int = 0):
+    def get_new_unique_file_name(model_file_path: str):
         base, ext = os.path.splitext(model_file_path)
         if not ext:
             ext = ".zip"
             model_file_path = f"{base}{ext}"
+
         if os.path.exists(model_file_path):
             model_file_path = f"{base}_1{ext}"
             return get_new_unique_file_name(model_file_path)
         else:
             return model_file_path
 
-    if is_overwrite:
-        model.save(current_model_file_path)
-    else:
-        test = get_new_unique_file_name(new_model_file_path)
-        model.save(test)
+    if not new_model_file_path:
+        new_model_file_path = current_model_file_path
+
+    if not is_overwrite:
+        new_model_file_path = get_new_unique_file_name(new_model_file_path)
+    model.save(new_model_file_path)
