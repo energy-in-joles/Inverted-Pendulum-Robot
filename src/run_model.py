@@ -40,7 +40,7 @@ def train_model(
     log_dir: str,
     new_model_file_path: str = "",
 ):
-    # run training with tensoboard logging
+    # run training with tensorboard logging
     class TensorboardLogging(BaseCallback):
         def __init__(self, log_dir, run_name, verbose=0):
             super(TensorboardLogging, self).__init__(verbose)
